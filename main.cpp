@@ -345,7 +345,7 @@ struct TreeNode
 
     NodeKind node_kind;
 
-    union{TokenType oper; int num; char* id;}; // defined for expression/int/identifier only
+    union{TokenType oper; double num; char* id;}; // defined for expression/int/identifier only
     ExprDataType expr_data_type; // defined for expression/int/identifier only
 
     int line_num;
@@ -734,8 +734,10 @@ struct LineLocation
     LineLocation* next;
 };
 
+enum variableDataType {BoolDataType, IntDataType, DoubleDataType };
 struct VariableInfo
 {
+    variableDataType datatype;
     char* name;
     int memloc;
     LineLocation* head_line; // the head of linked list of source line locations
@@ -771,7 +773,7 @@ struct SymbolTable
         return 0;
     }
 
-    void Insert(const char* name, int line_num)
+    void Insert(const char* name, int line_num, variableDataType dataType)
     {
         LineLocation* lineloc=new LineLocation;
         lineloc->line_num=line_num;
@@ -799,6 +801,7 @@ struct SymbolTable
         }
 
         VariableInfo* vi=new VariableInfo;
+        vi->datatype = dataType;
         vi->head_line=vi->tail_line=lineloc;
         vi->next_var=0;
         vi->memloc=num_vars++;
@@ -852,13 +855,13 @@ struct SymbolTable
         }
     }
 };
-
+// TODO: Edit expressions here
 void Analyze(TreeNode* node, SymbolTable* symbol_table)
 {
     int i;
 
     if(node->node_kind == DECLARE_NODE)
-        symbol_table->Insert(node->id, node->line_num);
+        symbol_table->Insert(node->id, node->line_num,IntDataType);
 
     for(i=0;i<MAX_CHILDREN;i++) if(node->child[i]) Analyze(node->child[i], symbol_table);
 
@@ -885,7 +888,7 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
 ////////////////////////////////////////////////////////////////////////////////////
 // Code Generator //////////////////////////////////////////////////////////////////
 
-int Power(int a, int b)
+double Power(double a, double b)
 {
     if(a==0) return 0;
     if(b==0) return 1;
@@ -893,13 +896,13 @@ int Power(int a, int b)
     return 0;
 }
 
-int Evaluate(TreeNode* node, SymbolTable* symbol_table, int* variables)
+double Evaluate(TreeNode* node, SymbolTable* symbol_table, double* variables)
 {
     if(node->node_kind==NUM_NODE) return node->num;
     if(node->node_kind==ID_NODE) return variables[symbol_table->Find(node->id)->memloc];
 
-    int a=Evaluate(node->child[0], symbol_table, variables);
-    int b=Evaluate(node->child[1], symbol_table, variables);
+    double a=Evaluate(node->child[0], symbol_table, variables);
+    double b=Evaluate(node->child[1], symbol_table, variables);
 
     if(node->oper==EQUAL) return a==b;
     if(node->oper==LESS_THAN) return a<b;
@@ -912,29 +915,31 @@ int Evaluate(TreeNode* node, SymbolTable* symbol_table, int* variables)
     return 0;
 }
 
-void RunProgram(TreeNode* node, SymbolTable* symbol_table, int* variables)
+void RunProgram(TreeNode* node, SymbolTable* symbol_table, double* variables)
 {
     if(node->node_kind==IF_NODE)
     {
-        int cond=Evaluate(node->child[0], symbol_table, variables);
-        if(cond) RunProgram(node->child[1], symbol_table, variables);
+        double cond=Evaluate(node->child[0], symbol_table, variables);
+        if((int)cond) RunProgram(node->child[1], symbol_table, variables);
         else if(node->child[2]) RunProgram(node->child[2], symbol_table, variables);
     }
 
     if(node->node_kind==ASSIGN_NODE)
     {
-        int v=Evaluate(node->child[0], symbol_table, variables);
+        double v=Evaluate(node->child[0], symbol_table, variables);
         variables[symbol_table->Find(node->id)->memloc]=v;
     }
     if(node->node_kind==READ_NODE)
     {
         printf("Enter %s: ", node->id);
-        scanf("%d", &variables[symbol_table->Find(node->id)->memloc]);
+        double v;
+        scanf("%lf", &v);
+        variables[symbol_table->Find(node->id)->memloc] = v;
     }
     if(node->node_kind==WRITE_NODE)
     {
-        int v=Evaluate(node->child[0], symbol_table, variables);
-        printf("Val: %d\n", v);
+        double v=Evaluate(node->child[0], symbol_table, variables);
+        printf("Val: %lf\n", v);
     }
     if(node->node_kind==REPEAT_NODE)
     {
@@ -950,7 +955,7 @@ void RunProgram(TreeNode* node, SymbolTable* symbol_table, int* variables)
 void RunProgram(TreeNode* syntax_tree, SymbolTable* symbol_table)
 {
     int i;
-    int* variables=new int[symbol_table->num_vars];
+    double* variables=new double[symbol_table->num_vars];
     for(i=0;i<symbol_table->num_vars;i++) variables[i]=0;
     RunProgram(syntax_tree, symbol_table, variables);
     delete[] variables;

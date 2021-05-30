@@ -3,7 +3,7 @@
 * [x] Check before adding variable to `symbol_table` whether it exists or not.
 * [ ] Check before assigning value to variable whether it is the same type or not `(double to int)` `(double to bool)`.
 * [ ] Before accessing any variable check if it exists in the table.
-* [ ] Store the variable datatype in with the variable.
+* [x] Store the variable datatype in with the variable.
 * [ ] Make the above for `double` and `bool`.
 * [ ] Check validity of expression evaluation by checking that every variable is the same type.
 * [ ] Also you cant use `bool` inside an expression.
