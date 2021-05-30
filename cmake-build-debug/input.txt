@@ -1,0 +1,3 @@
+int a , b;
+read a;
+write a
