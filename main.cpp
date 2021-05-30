@@ -917,6 +917,7 @@ void RunProgram(TreeNode* node, SymbolTable* symbol_table, int* variables)
         if(cond) RunProgram(node->child[1], symbol_table, variables);
         else if(node->child[2]) RunProgram(node->child[2], symbol_table, variables);
     }
+
     if(node->node_kind==ASSIGN_NODE)
     {
         int v=Evaluate(node->child[0], symbol_table, variables);
