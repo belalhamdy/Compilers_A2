@@ -1,7 +1,6 @@
 * [x] Parsing `int`, `bool` and `double` words.
-* [x] Parsing `int a , b , c ...`.
 * [x] Adding variables to the `symbol_table`.
-* [ ] Check before adding variable to `symbol_table` whether it exists or not.
+* [x] Check before adding variable to `symbol_table` whether it exists or not.
 * [ ] Check before assigning value to variable whether it is the same type or not `(double to int)` `(double to bool)`.
 * [ ] Before accessing any variable check if it exists in the table.
 * [ ] Store the variable datatype in with the variable.

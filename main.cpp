@@ -167,8 +167,8 @@ enum TokenType{
                 LEFT_PAREN, RIGHT_PAREN,
                 LEFT_BRACE, RIGHT_BRACE,
                 ID, NUM,
-                ENDFILE, ERROR,
-                COMMA
+                ENDFILE, ERROR
+
               };
 
 // Used for debugging only /////////////////////////////////////////////////////////
@@ -182,8 +182,8 @@ const char* TokenTypeStr[]=
                 "LeftParen", "RightParen",
                 "LeftBrace", "RightBrace",
                 "ID", "Num",
-                "EndFile", "Error",
-                "Comma"
+                "EndFile", "Error"
+
             };
 
 struct Token
@@ -228,7 +228,6 @@ const Token symbolic_tokens[]=
     Token(RIGHT_PAREN, ")"),
     Token(LEFT_BRACE, "{"),
     Token(RIGHT_BRACE, "}"),
-    Token(COMMA, ",")
 };
 const int num_symbolic_tokens=sizeof(symbolic_tokens)/sizeof(symbolic_tokens[0]);
 
@@ -565,17 +564,16 @@ TreeNode* DeclareStmt(CompilerInfo* pci, ParseInfo* ppi)
         throw 0;
     }
 
-    while(ppi->next_token.type==INT || ppi->next_token.type==COMMA){
+    if(ppi->next_token.type==INT){
         TreeNode* new_tree=new TreeNode;
         new_tree->node_kind=DECLARE_NODE;
         new_tree->oper=ppi->next_token.type;
         new_tree->line_num=pci->in_file.cur_line_num;
-        if(ppi->next_token.type==INT)
-            Match(pci, ppi, INT);
-        else
-            Match(pci, ppi, COMMA);
+
+        Match(pci, ppi, INT);
         if(ppi->next_token.type==ID)
             AllocateAndCopy(&tree->id, ppi->next_token.str);
+
         Match(pci, ppi, ID);
     }
 
@@ -769,6 +767,7 @@ struct SymbolTable
             if(Equals(name, cur->name)) return cur;
             cur=cur->next_var;
         }
+        printf("Error cannot find variable %s .",name);
         return 0;
     }
 
@@ -786,9 +785,13 @@ struct SymbolTable
         {
             if(Equals(name, cur->name))
             {
-                // just add this line location to the list of line locations of the existing var
+                printf("Error variable %s is already declared before.\n",name);
+                throw 0;
+                /*
+                 * // just add this line location to the list of line locations of the existing var
                 cur->tail_line->next=lineloc;
                 cur->tail_line=lineloc;
+                 */
                 return;
             }
             prev=cur;
@@ -854,7 +857,7 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
 {
     int i;
 
-    if(node->node_kind==ID_NODE || node->node_kind==READ_NODE || node->node_kind==ASSIGN_NODE || node->node_kind == DECLARE_NODE)
+    if(node->node_kind == DECLARE_NODE)
         symbol_table->Insert(node->id, node->line_num);
 
     for(i=0;i<MAX_CHILDREN;i++) if(node->child[i]) Analyze(node->child[i], symbol_table);

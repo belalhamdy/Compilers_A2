@@ -4,10 +4,6 @@ Start Declare Stmt
 Start Match
 [1] a (ID)
 Start Match
-[1] , (Comma)
-Start Match
-[1] b (ID)
-Start Match
 [1] ; (SemiColon)
 End Declare Stmt
 End Stmt
