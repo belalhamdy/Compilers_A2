@@ -338,11 +338,7 @@ const char* ExprDataTypeStr[]=
             };
 
 #define MAX_CHILDREN 3
-enum VariableDataType {BoolDataType, IntDataType, DoubleDataType };
-const char* VariableDataTypeStr[] =
-        {
-        "Boolean", "Integer", "Double"
-        };
+
 struct TreeNode
 {
     TreeNode* child[MAX_CHILDREN];
@@ -350,7 +346,6 @@ struct TreeNode
 
     NodeKind node_kind;
 
-    VariableDataType varDatatype;
     union{TokenType oper; double num; char* id;}; // defined for expression/int/identifier only
     ExprDataType expr_data_type; // defined for expression/int/identifier only
 
@@ -565,9 +560,9 @@ TreeNode* DeclareStmt(CompilerInfo* pci, ParseInfo* ppi)
     tree->node_kind=DECLARE_NODE;
     tree->line_num=pci->in_file.cur_line_num;
 
-    if(ppi->next_token.type==INT) tree->varDatatype = IntDataType;
-    else if(ppi->next_token.type==REAL) tree->varDatatype = DoubleDataType;
-    else if(ppi->next_token.type==BOOL) tree->varDatatype = BoolDataType;
+    if(ppi->next_token.type==INT) tree->expr_data_type = INTEGER;
+    else if(ppi->next_token.type==REAL) tree->expr_data_type = DOUBLE_EXPR;
+    else if(ppi->next_token.type==BOOL) tree->expr_data_type = BOOLEAN;
     else{
         fprintf(stderr, "Expected datatype, found %s", ppi->next_token.type);
         throw 0;
@@ -743,7 +738,7 @@ struct LineLocation
 
 struct VariableInfo
 {
-    VariableDataType datatype;
+    ExprDataType datatype;
     char* name;
     int memloc;
     LineLocation* head_line; // the head of linked list of source line locations
@@ -779,7 +774,7 @@ struct SymbolTable
         return 0;
     }
 
-    void Insert(const char* name, int line_num, VariableDataType dataType)
+    void Insert(const char* name, int line_num, ExprDataType dataType)
     {
         LineLocation* lineloc=new LineLocation;
         lineloc->line_num=line_num;
@@ -825,7 +820,7 @@ struct SymbolTable
             VariableInfo* curv=var_info[i];
             while(curv)
             {
-                printf("[Var=%s][Mem=%d][Datatype=%s]", curv->name, curv->memloc,VariableDataTypeStr[curv->datatype]);
+                printf("[Var=%s][Mem=%d][Datatype=%s]", curv->name, curv->memloc,ExprDataTypeStr[curv->datatype]);
                 LineLocation* curl=curv->head_line;
                 while(curl)
                 {
@@ -861,19 +856,13 @@ struct SymbolTable
         }
     }
 };
-ExprDataType getExprDataType(VariableDataType v){
-    if(v == IntDataType)
-        return INTEGER;
-    if(v == BoolDataType)
-        return BOOLEAN;
-    return DOUBLE_EXPR;
-}
+
 void Analyze(TreeNode* node, SymbolTable* symbol_table)
 {
     int i;
 
     if(node->node_kind == DECLARE_NODE)
-        symbol_table->Insert(node->id, node->line_num,node->varDatatype);
+        symbol_table->Insert(node->id, node->line_num,node->expr_data_type);
 
     for(i=0;i<MAX_CHILDREN;i++) if(node->child[i]) Analyze(node->child[i], symbol_table);
 
@@ -886,17 +875,16 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
         node->expr_data_type=INTEGER;
     }
     else if(node->node_kind==ID_NODE){
-        VariableDataType datatype = symbol_table->Find(node->id)->datatype;
-        node->varDatatype = datatype;
-        node->expr_data_type= getExprDataType(datatype);
+        ExprDataType datatype = symbol_table->Find(node->id)->datatype;
+        node->expr_data_type = datatype;
     }
 
     if(node->node_kind==OPER_NODE)
     {
-        ExprDataType datatype_1 = getExprDataType(node->child[0]->varDatatype);
-        ExprDataType datatype_2 = getExprDataType(node->child[1]->varDatatype);
+        ExprDataType datatype_1 = node->child[0]->expr_data_type;
+        ExprDataType datatype_2 = node->child[1]->expr_data_type;
         if(datatype_1 != datatype_2)
-            printf("Expression cannot run on %s and %s.\n",VariableDataTypeStr[datatype_1],VariableDataTypeStr[datatype_2]);
+            printf("Expression cannot run on %s and %s.\n",ExprDataTypeStr[datatype_1],ExprDataTypeStr[datatype_2]);
     }
     if(node->node_kind==IF_NODE && node->child[0]->expr_data_type!=BOOLEAN) printf("ERROR If test must be BOOLEAN\n");
     if(node->node_kind==REPEAT_NODE && node->child[1]->expr_data_type!=BOOLEAN) printf("ERROR Repeat test must be BOOLEAN\n");
