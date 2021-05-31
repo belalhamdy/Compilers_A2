@@ -2,27 +2,27 @@ Start StmtSeq
 Start Stmt
 Start Declare Stmt
 Start Match
-[1] ia (ID)
+[1] ba (ID)
 Start Match
 [1] ; (SemiColon)
 End Declare Stmt
 End Stmt
 Start Match
-[1] int (Int)
+[1] bool (Bool)
 Start Stmt
 Start Declare Stmt
 Start Match
-[1] ib (ID)
+[1] bb (ID)
 Start Match
 [1] ; (SemiColon)
 End Declare Stmt
 End Stmt
 Start Match
-[1] int (Int)
+[1] bool (Bool)
 Start Stmt
 Start Declare Stmt
 Start Match
-[1] ic (ID)
+[1] bc (ID)
 Start Match
 [1] ; (SemiColon)
 End Declare Stmt
@@ -32,7 +32,7 @@ Start Match
 Start Stmt
 Start ReadStmt
 Start Match
-[2] ia (ID)
+[2] ba (ID)
 Start Match
 [2] ; (SemiColon)
 End ReadStmt
@@ -42,7 +42,7 @@ Start Match
 Start Stmt
 Start ReadStmt
 Start Match
-[2] ib (ID)
+[2] bb (ID)
 Start Match
 [2] ; (SemiColon)
 End ReadStmt
@@ -52,44 +52,43 @@ Start Match
 Start Stmt
 Start ReadStmt
 Start Match
-[2] ic (ID)
+[2] bc (ID)
 Start Match
 [2] ; (SemiColon)
 End ReadStmt
 End Stmt
 Start Match
-[3] write (Write)
+[3] if (If)
 Start Stmt
-Start WriteStmt
+Start IfStmt
 Start Match
-[3] ia (ID)
+[3] ba (ID)
 Start Expr
 Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[3] + (Plus)
+[3] then (Then)
 End NewExpr
 End Factor
 End Term
+End MathExpr
+End Expr
 Start Match
-[3] ib (ID)
+[3] write (Write)
+Start StmtSeq
+Start Stmt
+Start WriteStmt
+Start Match
+[3] 1 (Num)
+Start Expr
+Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[3] + (Plus)
-End NewExpr
-End Factor
-End Term
-Start Match
-[3] ic (ID)
-Start Term
-Start Factor
-Start NewExpr
-Start Match
-[3] ; (SemiColon)
+[3] end (End)
 End NewExpr
 End Factor
 End Term
@@ -97,39 +96,43 @@ End MathExpr
 End Expr
 End WriteStmt
 End Stmt
+End StmtSeq
 Start Match
-[3] write (Write)
+[3] ; (SemiColon)
+End IfStmt
+End Stmt
+Start Match
+[4] if (If)
 Start Stmt
-Start WriteStmt
+Start IfStmt
 Start Match
-[3] ia (ID)
+[4] bb (ID)
 Start Expr
 Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[3] - (Minus)
+[4] then (Then)
 End NewExpr
 End Factor
 End Term
+End MathExpr
+End Expr
 Start Match
-[3] ib (ID)
+[4] write (Write)
+Start StmtSeq
+Start Stmt
+Start WriteStmt
+Start Match
+[4] 2 (Num)
+Start Expr
+Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[3] - (Minus)
-End NewExpr
-End Factor
-End Term
-Start Match
-[3] ic (ID)
-Start Term
-Start Factor
-Start NewExpr
-Start Match
-[3] ; (SemiColon)
+[4] end (End)
 End NewExpr
 End Factor
 End Term
@@ -137,35 +140,43 @@ End MathExpr
 End Expr
 End WriteStmt
 End Stmt
+End StmtSeq
 Start Match
-[3] write (Write)
+[4] ; (SemiColon)
+End IfStmt
+End Stmt
+Start Match
+[5] if (If)
 Start Stmt
-Start WriteStmt
+Start IfStmt
 Start Match
-[3] ia (ID)
+[5] bc (ID)
 Start Expr
 Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[3] * (Times)
+[5] then (Then)
 End NewExpr
 End Factor
+End Term
+End MathExpr
+End Expr
 Start Match
-[3] ib (ID)
+[5] write (Write)
+Start StmtSeq
+Start Stmt
+Start WriteStmt
+Start Match
+[5] 3 (Num)
+Start Expr
+Start MathExpr
+Start Term
 Start Factor
 Start NewExpr
 Start Match
-[3] * (Times)
-End NewExpr
-End Factor
-Start Match
-[3] ic (ID)
-Start Factor
-Start NewExpr
-Start Match
-[3] ; (SemiColon)
+[5] end (End)
 End NewExpr
 End Factor
 End Term
@@ -173,40 +184,101 @@ End MathExpr
 End Expr
 End WriteStmt
 End Stmt
+End StmtSeq
 Start Match
-[3] write (Write)
+[5] ; (SemiColon)
+End IfStmt
+End Stmt
+Start Match
+[6] if (If)
 Start Stmt
-Start WriteStmt
+Start IfStmt
 Start Match
-[3] ia (ID)
+[6] ba (ID)
 Start Expr
 Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[3] / (Divide)
+[6] = (Equal)
 End NewExpr
 End Factor
+End Term
+End MathExpr
 Start Match
-[3] ib (ID)
+[6] bb (ID)
+Start MathExpr
+Start Term
 Start Factor
 Start NewExpr
 Start Match
-[3] / (Divide)
+[6] then (Then)
 End NewExpr
 End Factor
+End Term
+End MathExpr
+End Expr
 Start Match
-[3] ic (ID)
+[7] if (If)
+Start StmtSeq
+Start Stmt
+Start IfStmt
+Start Match
+[7] ba (ID)
+Start Expr
+Start MathExpr
+Start Term
 Start Factor
 Start NewExpr
 Start Match
-[3]  (EndFile)
+[7] = (Equal)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[7] bc (ID)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[7] then (Then)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+Start Match
+[8] write (Write)
+Start StmtSeq
+Start Stmt
+Start WriteStmt
+Start Match
+[8] 123 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[9] end (End)
 End NewExpr
 End Factor
 End Term
 End MathExpr
 End Expr
 End WriteStmt
+End Stmt
+End StmtSeq
+Start Match
+[10] end (End)
+End IfStmt
+End Stmt
+End StmtSeq
+Start Match
+[10]  (EndFile)
+End IfStmt
 End Stmt
 End StmtSeq

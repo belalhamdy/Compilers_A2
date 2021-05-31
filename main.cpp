@@ -944,6 +944,11 @@ void RunProgram(TreeNode* node, SymbolTable* symbol_table, double* variables)
         printf("Enter %s: ", node->id);
         double v;
         scanf("%lf", &v);
+        ExprDataType dataType = symbol_table->Find(node->id)->datatype;
+        if(dataType == BOOLEAN){
+            if((int)v) v = 1;
+            else v = 0;
+        }
         variables[symbol_table->Find(node->id)->memloc] = v;
     }
     if(node->node_kind==WRITE_NODE)
