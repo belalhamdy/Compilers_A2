@@ -1,3 +1,4 @@
-bool a ;
-read a;
-write a
+int a;
+int b;
+write a + b
+

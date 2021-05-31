@@ -160,7 +160,7 @@ struct CompilerInfo
 #define MAX_TOKEN_LEN 40
 
 enum TokenType{
-                INT, DOUBLE, BOOL,
+                INT, REAL, BOOL,
                 IF, THEN, ELSE, END, REPEAT, UNTIL, READ, WRITE,
                 ASSIGN, EQUAL, LESS_THAN,
                 PLUS, MINUS, TIMES, DIVIDE, POWER,
@@ -175,7 +175,7 @@ enum TokenType{
 // Used for debugging only /////////////////////////////////////////////////////////
 const char* TokenTypeStr[]=
             {
-                "Int", "Double", "Bool",
+                "Int", "Real", "Bool",
                 "If", "Then", "Else", "End", "Repeat", "Until", "Read", "Write",
                 "Assign", "Equal", "LessThan",
                 "Plus", "Minus", "Times", "Divide", "Power",
@@ -199,7 +199,7 @@ struct Token
 const Token reserved_words[]=
 {
     Token(INT,"int"),
-    Token(DOUBLE,"double"),
+    Token(REAL,"real"),
     Token(BOOL,"bool"),
     Token(IF, "if"),
     Token(THEN, "then"),
@@ -566,7 +566,7 @@ TreeNode* DeclareStmt(CompilerInfo* pci, ParseInfo* ppi)
     tree->line_num=pci->in_file.cur_line_num;
 
     if(ppi->next_token.type==INT) tree->varDatatype = IntDataType;
-    else if(ppi->next_token.type==DOUBLE) tree->varDatatype = DoubleDataType;
+    else if(ppi->next_token.type==REAL) tree->varDatatype = DoubleDataType;
     else if(ppi->next_token.type==BOOL) tree->varDatatype = BoolDataType;
     else{
         fprintf(stderr, "Expected datatype, found %s", ppi->next_token.type);
@@ -653,7 +653,7 @@ TreeNode* Stmt(CompilerInfo* pci, ParseInfo* ppi)
     if(ppi->next_token.type==IF) tree=IfStmt(pci, ppi);
     else if(ppi->next_token.type==REPEAT) tree=RepeatStmt(pci, ppi);
     else if(ppi->next_token.type==ID) tree=AssignStmt(pci, ppi);
-    else if(ppi->next_token.type==INT || ppi->next_token.type==BOOL || ppi->next_token.type==DOUBLE) tree=DeclareStmt(pci, ppi);
+    else if(ppi->next_token.type==INT || ppi->next_token.type==BOOL || ppi->next_token.type==REAL) tree=DeclareStmt(pci, ppi);
     else if(ppi->next_token.type==READ) tree=ReadStmt(pci, ppi);
     else if(ppi->next_token.type==WRITE) tree=WriteStmt(pci, ppi);
     else throw 0;
@@ -861,6 +861,13 @@ struct SymbolTable
         }
     }
 };
+ExprDataType getExprDataType(VariableDataType v){
+    if(v == IntDataType)
+        return INTEGER;
+    if(v == BoolDataType)
+        return BOOLEAN;
+    return DOUBLE_EXPR;
+}
 void Analyze(TreeNode* node, SymbolTable* symbol_table)
 {
     int i;
@@ -873,28 +880,27 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
     if(node->node_kind==OPER_NODE)
     {
         if(node->oper==EQUAL || node->oper==LESS_THAN) node->expr_data_type=BOOLEAN;
-        else node->expr_data_type=INTEGER;
+        else node->expr_data_type=getExprDataType(node->child[0]->varDatatype);
     }
     else if(node->node_kind==NUM_NODE){
         node->expr_data_type=INTEGER;
     }
     else if(node->node_kind==ID_NODE){
         VariableDataType datatype = symbol_table->Find(node->id)->datatype;
-        ExprDataType exp_data_type = DOUBLE_EXPR;
-        if(datatype == IntDataType) exp_data_type = INTEGER;
-        else if(datatype == BoolDataType) exp_data_type = BOOLEAN;
-        node->expr_data_type= exp_data_type;
+        node->expr_data_type= getExprDataType(datatype);
     }
 
     if(node->node_kind==OPER_NODE)
     {
-        if(node->child[0]->expr_data_type!=INTEGER || node->child[1]->expr_data_type!=INTEGER)
-            printf("ERROR Operator applied to non-integers\n");
+        ExprDataType datatype_1 = getExprDataType(node->child[0]->varDatatype);
+        ExprDataType datatype_2 = getExprDataType(node->child[1]->varDatatype);
+        if(datatype_1 != datatype_2)
+            printf("Expression cannot run on %s and %s.\n",VariableDataTypeStr[datatype_1],VariableDataTypeStr[datatype_2]);
     }
     if(node->node_kind==IF_NODE && node->child[0]->expr_data_type!=BOOLEAN) printf("ERROR If test must be BOOLEAN\n");
     if(node->node_kind==REPEAT_NODE && node->child[1]->expr_data_type!=BOOLEAN) printf("ERROR Repeat test must be BOOLEAN\n");
-    /*if(node->node_kind==WRITE_NODE && node->child[0]->expr_data_type!=INTEGER) printf("ERROR Write works only for INTEGER\n");
-    if(node->node_kind==ASSIGN_NODE && node->child[0]->expr_data_type!=INTEGER) printf("ERROR Assign works only for INTEGER\n");*/
+//    if(node->node_kind==WRITE_NODE && node->child[0]->expr_data_type!=INTEGER) printf("ERROR Write works only for INTEGER\n");
+//    if(node->node_kind==ASSIGN_NODE && node->child[0]->expr_data_type!=INTEGER) printf("ERROR Assign works only for INTEGER\n");
 
     if(node->sibling) Analyze(node->sibling, symbol_table);
 }
@@ -914,6 +920,7 @@ double Evaluate(TreeNode* node, SymbolTable* symbol_table, double* variables)
 {
     if(node->node_kind==NUM_NODE) return node->num;
     if(node->node_kind==ID_NODE) return variables[symbol_table->Find(node->id)->memloc];
+
 
     double a=Evaluate(node->child[0], symbol_table, variables);
     double b=Evaluate(node->child[1], symbol_table, variables);
