@@ -4,6 +4,7 @@
 #include <cstring>
 using namespace std;
 
+
 /*
 { Sample program
   in TINY language
@@ -159,7 +160,7 @@ struct CompilerInfo
 #define MAX_TOKEN_LEN 40
 
 enum TokenType{
-                INT, REAL, BOOL,
+                INT, DOUBLE, BOOL,
                 IF, THEN, ELSE, END, REPEAT, UNTIL, READ, WRITE,
                 ASSIGN, EQUAL, LESS_THAN,
                 PLUS, MINUS, TIMES, DIVIDE, POWER,
@@ -174,7 +175,7 @@ enum TokenType{
 // Used for debugging only /////////////////////////////////////////////////////////
 const char* TokenTypeStr[]=
             {
-                "Int", "Real", "Bool",
+                "Int", "Double", "Bool",
                 "If", "Then", "Else", "End", "Repeat", "Until", "Read", "Write",
                 "Assign", "Equal", "LessThan",
                 "Plus", "Minus", "Times", "Divide", "Power",
@@ -198,7 +199,7 @@ struct Token
 const Token reserved_words[]=
 {
     Token(INT,"int"),
-    Token(REAL,"real"),
+    Token(DOUBLE,"double"),
     Token(BOOL,"bool"),
     Token(IF, "if"),
     Token(THEN, "then"),
@@ -328,7 +329,7 @@ const char* NodeKindStr[]=
                 "Oper", "Num", "ID","Declare"
             };
 
-enum ExprDataType {VOID, INTEGER, BOOLEAN, DOUBLE};
+enum ExprDataType {VOID, INTEGER, BOOLEAN, DOUBLE_EXPR};
 
 // Used for debugging only /////////////////////////////////////////////////////////
 const char* ExprDataTypeStr[]=
@@ -559,22 +560,22 @@ TreeNode* DeclareStmt(CompilerInfo* pci, ParseInfo* ppi)
     tree->node_kind=DECLARE_NODE;
     tree->line_num=pci->in_file.cur_line_num;
 
-    if(ppi->next_token.type!=INT){
-        fprintf(stderr, "Expected int, found %s", ppi->next_token.type);
-        throw 0;
-    }
 
-    if(ppi->next_token.type==INT){
+    if(ppi->next_token.type==INT || ppi->next_token.type == BOOL || ppi->next_token.type == DOUBLE){
         TreeNode* new_tree=new TreeNode;
         new_tree->node_kind=DECLARE_NODE;
         new_tree->oper=ppi->next_token.type;
         new_tree->line_num=pci->in_file.cur_line_num;
 
-        Match(pci, ppi, INT);
+        Match(pci, ppi, ppi->next_token.type);
         if(ppi->next_token.type==ID)
             AllocateAndCopy(&tree->id, ppi->next_token.str);
 
         Match(pci, ppi, ID);
+    }
+    else{
+        fprintf(stderr, "Expected int, found %s", ppi->next_token.type);
+        throw 0;
     }
 
 
@@ -646,7 +647,7 @@ TreeNode* Stmt(CompilerInfo* pci, ParseInfo* ppi)
     if(ppi->next_token.type==IF) tree=IfStmt(pci, ppi);
     else if(ppi->next_token.type==REPEAT) tree=RepeatStmt(pci, ppi);
     else if(ppi->next_token.type==ID) tree=AssignStmt(pci, ppi);
-    else if(ppi->next_token.type==INT) tree=DeclareStmt(pci, ppi);
+    else if(ppi->next_token.type==INT || ppi->next_token.type==BOOL || ppi->next_token.type==DOUBLE) tree=DeclareStmt(pci, ppi);
     else if(ppi->next_token.type==READ) tree=ReadStmt(pci, ppi);
     else if(ppi->next_token.type==WRITE) tree=WriteStmt(pci, ppi);
     else throw 0;

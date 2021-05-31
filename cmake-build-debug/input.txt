@@ -1,3 +1,3 @@
-int a ;
+double a ;
 read a;
-write a
+write b
