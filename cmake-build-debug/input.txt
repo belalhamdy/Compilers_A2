@@ -1,3 +1,5 @@
 double a ;
+int b ;
+bool c ;
 read a;
 write b

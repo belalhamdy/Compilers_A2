@@ -338,7 +338,11 @@ const char* ExprDataTypeStr[]=
             };
 
 #define MAX_CHILDREN 3
-
+enum VariableDataType {BoolDataType, IntDataType, DoubleDataType };
+const char* VariableDataTypeStr[] =
+        {
+        "Boolean", "Integer", "Double"
+        };
 struct TreeNode
 {
     TreeNode* child[MAX_CHILDREN];
@@ -346,6 +350,7 @@ struct TreeNode
 
     NodeKind node_kind;
 
+    VariableDataType varDatatype;
     union{TokenType oper; double num; char* id;}; // defined for expression/int/identifier only
     ExprDataType expr_data_type; // defined for expression/int/identifier only
 
@@ -560,23 +565,24 @@ TreeNode* DeclareStmt(CompilerInfo* pci, ParseInfo* ppi)
     tree->node_kind=DECLARE_NODE;
     tree->line_num=pci->in_file.cur_line_num;
 
-
-    if(ppi->next_token.type==INT || ppi->next_token.type == BOOL || ppi->next_token.type == DOUBLE){
-        TreeNode* new_tree=new TreeNode;
-        new_tree->node_kind=DECLARE_NODE;
-        new_tree->oper=ppi->next_token.type;
-        new_tree->line_num=pci->in_file.cur_line_num;
-
-        Match(pci, ppi, ppi->next_token.type);
-        if(ppi->next_token.type==ID)
-            AllocateAndCopy(&tree->id, ppi->next_token.str);
-
-        Match(pci, ppi, ID);
-    }
+    if(ppi->next_token.type==INT) tree->varDatatype = IntDataType;
+    else if(ppi->next_token.type==DOUBLE) tree->varDatatype = DoubleDataType;
+    else if(ppi->next_token.type==BOOL) tree->varDatatype = BoolDataType;
     else{
-        fprintf(stderr, "Expected int, found %s", ppi->next_token.type);
+        fprintf(stderr, "Expected datatype, found %s", ppi->next_token.type);
         throw 0;
     }
+    tree->oper = ppi->next_token.type;
+    Match(pci, ppi, ppi->next_token.type);
+    if(ppi->next_token.type==ID)
+        AllocateAndCopy(&tree->id, ppi->next_token.str);
+    else{
+        fprintf(stderr, "Expected id, found %s", ppi->next_token.type);
+        throw 0;
+    }
+
+
+    Match(pci, ppi, ID);
 
 
 
@@ -735,10 +741,9 @@ struct LineLocation
     LineLocation* next;
 };
 
-enum variableDataType {BoolDataType, IntDataType, DoubleDataType };
 struct VariableInfo
 {
-    variableDataType datatype;
+    VariableDataType datatype;
     char* name;
     int memloc;
     LineLocation* head_line; // the head of linked list of source line locations
@@ -774,7 +779,7 @@ struct SymbolTable
         return 0;
     }
 
-    void Insert(const char* name, int line_num, variableDataType dataType)
+    void Insert(const char* name, int line_num, VariableDataType dataType)
     {
         LineLocation* lineloc=new LineLocation;
         lineloc->line_num=line_num;
@@ -820,7 +825,7 @@ struct SymbolTable
             VariableInfo* curv=var_info[i];
             while(curv)
             {
-                printf("[Var=%s][Mem=%d]", curv->name, curv->memloc);
+                printf("[Var=%s][Mem=%d][Datatype=%s]", curv->name, curv->memloc,VariableDataTypeStr[curv->datatype]);
                 LineLocation* curl=curv->head_line;
                 while(curl)
                 {
@@ -862,7 +867,7 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
     int i;
 
     if(node->node_kind == DECLARE_NODE)
-        symbol_table->Insert(node->id, node->line_num,IntDataType);
+        symbol_table->Insert(node->id, node->line_num,node->varDatatype);
 
     for(i=0;i<MAX_CHILDREN;i++) if(node->child[i]) Analyze(node->child[i], symbol_table);
 
@@ -948,7 +953,7 @@ void RunProgram(TreeNode* node, SymbolTable* symbol_table, double* variables)
         {
            RunProgram(node->child[0], symbol_table, variables);
         }
-        while(!Evaluate(node->child[1], symbol_table, variables));
+        while(!(int)Evaluate(node->child[1], symbol_table, variables));
     }
     if(node->sibling) RunProgram(node->sibling, symbol_table, variables);
 }

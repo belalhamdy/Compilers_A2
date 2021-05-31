@@ -8,28 +8,48 @@ Start Match
 End Declare Stmt
 End Stmt
 Start Match
-[2] read (Read)
+[2] int (Int)
+Start Stmt
+Start Declare Stmt
+Start Match
+[2] b (ID)
+Start Match
+[2] ; (SemiColon)
+End Declare Stmt
+End Stmt
+Start Match
+[3] bool (Bool)
+Start Stmt
+Start Declare Stmt
+Start Match
+[3] c (ID)
+Start Match
+[3] ; (SemiColon)
+End Declare Stmt
+End Stmt
+Start Match
+[4] read (Read)
 Start Stmt
 Start ReadStmt
 Start Match
-[2] a (ID)
+[4] a (ID)
 Start Match
-[2] ; (SemiColon)
+[4] ; (SemiColon)
 End ReadStmt
 End Stmt
 Start Match
-[3] write (Write)
+[5] write (Write)
 Start Stmt
 Start WriteStmt
 Start Match
-[3] a (ID)
+[5] b (ID)
 Start Expr
 Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[3]  (EndFile)
+[5]  (EndFile)
 End NewExpr
 End Factor
 End Term
