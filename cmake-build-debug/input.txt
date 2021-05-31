@@ -1,5 +1,3 @@
-double a ;
-int b ;
-bool c ;
+bool a ;
 read a;
-write b
+write a

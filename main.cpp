@@ -861,7 +861,6 @@ struct SymbolTable
         }
     }
 };
-// TODO: Edit expressions here
 void Analyze(TreeNode* node, SymbolTable* symbol_table)
 {
     int i;
@@ -876,7 +875,16 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
         if(node->oper==EQUAL || node->oper==LESS_THAN) node->expr_data_type=BOOLEAN;
         else node->expr_data_type=INTEGER;
     }
-    else if(node->node_kind==ID_NODE || node->node_kind==NUM_NODE) node->expr_data_type=INTEGER;
+    else if(node->node_kind==NUM_NODE){
+        node->expr_data_type=INTEGER;
+    }
+    else if(node->node_kind==ID_NODE){
+        VariableDataType datatype = symbol_table->Find(node->id)->datatype;
+        ExprDataType exp_data_type = DOUBLE_EXPR;
+        if(datatype == IntDataType) exp_data_type = INTEGER;
+        else if(datatype == BoolDataType) exp_data_type = BOOLEAN;
+        node->expr_data_type= exp_data_type;
+    }
 
     if(node->node_kind==OPER_NODE)
     {
@@ -885,8 +893,8 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
     }
     if(node->node_kind==IF_NODE && node->child[0]->expr_data_type!=BOOLEAN) printf("ERROR If test must be BOOLEAN\n");
     if(node->node_kind==REPEAT_NODE && node->child[1]->expr_data_type!=BOOLEAN) printf("ERROR Repeat test must be BOOLEAN\n");
-    if(node->node_kind==WRITE_NODE && node->child[0]->expr_data_type!=INTEGER) printf("ERROR Write works only for INTEGER\n");
-    if(node->node_kind==ASSIGN_NODE && node->child[0]->expr_data_type!=INTEGER) printf("ERROR Assign works only for INTEGER\n");
+    /*if(node->node_kind==WRITE_NODE && node->child[0]->expr_data_type!=INTEGER) printf("ERROR Write works only for INTEGER\n");
+    if(node->node_kind==ASSIGN_NODE && node->child[0]->expr_data_type!=INTEGER) printf("ERROR Assign works only for INTEGER\n");*/
 
     if(node->sibling) Analyze(node->sibling, symbol_table);
 }
@@ -945,7 +953,16 @@ void RunProgram(TreeNode* node, SymbolTable* symbol_table, double* variables)
     if(node->node_kind==WRITE_NODE)
     {
         double v=Evaluate(node->child[0], symbol_table, variables);
-        printf("Val: %lf\n", v);
+        VariableDataType datatype = symbol_table->Find(node->child[0]->id)->datatype;
+        if(datatype == IntDataType)
+            printf("Val: %d\n", v);
+        else if(datatype == DoubleDataType)
+            printf("Val: %lf\n", v);
+        else if(datatype == BoolDataType)
+        {
+            if(int(v) == 0) printf("Val: false (0)\n");
+            else printf("Val: true (1)\n");
+        }
     }
     if(node->node_kind==REPEAT_NODE)
     {
