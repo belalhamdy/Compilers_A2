@@ -1,4 +1,3 @@
-int a;
-int b;
-write a + b
-
+int ia; int ib; int ic;
+read ia; read ib; read ic;
+write ia+ib+ic; write ia-ib-ic; write ia*ib*ic; write ia/ib/ic

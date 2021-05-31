@@ -880,13 +880,14 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
     if(node->node_kind==OPER_NODE)
     {
         if(node->oper==EQUAL || node->oper==LESS_THAN) node->expr_data_type=BOOLEAN;
-        else node->expr_data_type=getExprDataType(node->child[0]->varDatatype);
+        else node->expr_data_type=node->child[0]->expr_data_type;
     }
     else if(node->node_kind==NUM_NODE){
         node->expr_data_type=INTEGER;
     }
     else if(node->node_kind==ID_NODE){
         VariableDataType datatype = symbol_table->Find(node->id)->datatype;
+        node->varDatatype = datatype;
         node->expr_data_type= getExprDataType(datatype);
     }
 
@@ -960,12 +961,12 @@ void RunProgram(TreeNode* node, SymbolTable* symbol_table, double* variables)
     if(node->node_kind==WRITE_NODE)
     {
         double v=Evaluate(node->child[0], symbol_table, variables);
-        VariableDataType datatype = symbol_table->Find(node->child[0]->id)->datatype;
-        if(datatype == IntDataType)
-            printf("Val: %d\n", v);
-        else if(datatype == DoubleDataType)
+        ExprDataType datatype = node->child[0]->expr_data_type;
+        if(datatype == INTEGER)
+            printf("Val: %d\n", (int)v);
+        else if(datatype == DOUBLE_EXPR)
             printf("Val: %lf\n", v);
-        else if(datatype == BoolDataType)
+        else if(datatype == BOOLEAN)
         {
             if(int(v) == 0) printf("Val: false (0)\n");
             else printf("Val: true (1)\n");

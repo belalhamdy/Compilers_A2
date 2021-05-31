@@ -2,27 +2,67 @@ Start StmtSeq
 Start Stmt
 Start Declare Stmt
 Start Match
-[1] a (ID)
+[1] ia (ID)
 Start Match
 [1] ; (SemiColon)
 End Declare Stmt
 End Stmt
 Start Match
-[2] int (Int)
+[1] int (Int)
 Start Stmt
 Start Declare Stmt
 Start Match
-[2] b (ID)
+[1] ib (ID)
+Start Match
+[1] ; (SemiColon)
+End Declare Stmt
+End Stmt
+Start Match
+[1] int (Int)
+Start Stmt
+Start Declare Stmt
+Start Match
+[1] ic (ID)
+Start Match
+[1] ; (SemiColon)
+End Declare Stmt
+End Stmt
+Start Match
+[2] read (Read)
+Start Stmt
+Start ReadStmt
+Start Match
+[2] ia (ID)
 Start Match
 [2] ; (SemiColon)
-End Declare Stmt
+End ReadStmt
+End Stmt
+Start Match
+[2] read (Read)
+Start Stmt
+Start ReadStmt
+Start Match
+[2] ib (ID)
+Start Match
+[2] ; (SemiColon)
+End ReadStmt
+End Stmt
+Start Match
+[2] read (Read)
+Start Stmt
+Start ReadStmt
+Start Match
+[2] ic (ID)
+Start Match
+[2] ; (SemiColon)
+End ReadStmt
 End Stmt
 Start Match
 [3] write (Write)
 Start Stmt
 Start WriteStmt
 Start Match
-[3] a (ID)
+[3] ia (ID)
 Start Expr
 Start MathExpr
 Start Term
@@ -34,12 +74,134 @@ End NewExpr
 End Factor
 End Term
 Start Match
-[3] b (ID)
+[3] ib (ID)
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[4]  (EndFile)
+[3] + (Plus)
+End NewExpr
+End Factor
+End Term
+Start Match
+[3] ic (ID)
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[3] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End WriteStmt
+End Stmt
+Start Match
+[3] write (Write)
+Start Stmt
+Start WriteStmt
+Start Match
+[3] ia (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[3] - (Minus)
+End NewExpr
+End Factor
+End Term
+Start Match
+[3] ib (ID)
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[3] - (Minus)
+End NewExpr
+End Factor
+End Term
+Start Match
+[3] ic (ID)
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[3] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End WriteStmt
+End Stmt
+Start Match
+[3] write (Write)
+Start Stmt
+Start WriteStmt
+Start Match
+[3] ia (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[3] * (Times)
+End NewExpr
+End Factor
+Start Match
+[3] ib (ID)
+Start Factor
+Start NewExpr
+Start Match
+[3] * (Times)
+End NewExpr
+End Factor
+Start Match
+[3] ic (ID)
+Start Factor
+Start NewExpr
+Start Match
+[3] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End WriteStmt
+End Stmt
+Start Match
+[3] write (Write)
+Start Stmt
+Start WriteStmt
+Start Match
+[3] ia (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[3] / (Divide)
+End NewExpr
+End Factor
+Start Match
+[3] ib (ID)
+Start Factor
+Start NewExpr
+Start Match
+[3] / (Divide)
+End NewExpr
+End Factor
+Start Match
+[3] ic (ID)
+Start Factor
+Start NewExpr
+Start Match
+[3]  (EndFile)
 End NewExpr
 End Factor
 End Term
