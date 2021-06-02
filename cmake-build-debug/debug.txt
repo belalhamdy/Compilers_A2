@@ -2,283 +2,125 @@ Start StmtSeq
 Start Stmt
 Start Declare Stmt
 Start Match
-[1] ba (ID)
+[1] a (ID)
 Start Match
 [1] ; (SemiColon)
 End Declare Stmt
 End Stmt
 Start Match
-[1] bool (Bool)
+[2] real (Real)
 Start Stmt
 Start Declare Stmt
 Start Match
-[1] bb (ID)
+[2] b (ID)
 Start Match
-[1] ; (SemiColon)
+[2] ; (SemiColon)
 End Declare Stmt
 End Stmt
 Start Match
-[1] bool (Bool)
+[3] real (Real)
 Start Stmt
 Start Declare Stmt
 Start Match
-[1] bc (ID)
-Start Match
-[1] ; (SemiColon)
-End Declare Stmt
-End Stmt
-Start Match
-[2] read (Read)
-Start Stmt
-Start ReadStmt
-Start Match
-[2] ba (ID)
-Start Match
-[2] ; (SemiColon)
-End ReadStmt
-End Stmt
-Start Match
-[2] read (Read)
-Start Stmt
-Start ReadStmt
-Start Match
-[2] bb (ID)
-Start Match
-[2] ; (SemiColon)
-End ReadStmt
-End Stmt
-Start Match
-[2] read (Read)
-Start Stmt
-Start ReadStmt
-Start Match
-[2] bc (ID)
-Start Match
-[2] ; (SemiColon)
-End ReadStmt
-End Stmt
-Start Match
-[3] if (If)
-Start Stmt
-Start IfStmt
-Start Match
-[3] ba (ID)
-Start Expr
-Start MathExpr
-Start Term
-Start Factor
-Start NewExpr
-Start Match
-[3] then (Then)
-End NewExpr
-End Factor
-End Term
-End MathExpr
-End Expr
-Start Match
-[3] write (Write)
-Start StmtSeq
-Start Stmt
-Start WriteStmt
-Start Match
-[3] 1 (Num)
-Start Expr
-Start MathExpr
-Start Term
-Start Factor
-Start NewExpr
-Start Match
-[3] end (End)
-End NewExpr
-End Factor
-End Term
-End MathExpr
-End Expr
-End WriteStmt
-End Stmt
-End StmtSeq
+[3] c (ID)
 Start Match
 [3] ; (SemiColon)
-End IfStmt
+End Declare Stmt
 End Stmt
 Start Match
-[4] if (If)
+[4] b (ID)
 Start Stmt
-Start IfStmt
+Start AssignStmt
 Start Match
-[4] bb (ID)
+[4] := (Assign)
+Start Match
+[4] 1.0 (Num)
 Start Expr
 Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
-Start Match
-[4] then (Then)
-End NewExpr
-End Factor
-End Term
-End MathExpr
-End Expr
-Start Match
-[4] write (Write)
-Start StmtSeq
-Start Stmt
-Start WriteStmt
-Start Match
-[4] 2 (Num)
-Start Expr
-Start MathExpr
-Start Term
-Start Factor
-Start NewExpr
-Start Match
-[4] end (End)
-End NewExpr
-End Factor
-End Term
-End MathExpr
-End Expr
-End WriteStmt
-End Stmt
-End StmtSeq
 Start Match
 [4] ; (SemiColon)
-End IfStmt
-End Stmt
-Start Match
-[5] if (If)
-Start Stmt
-Start IfStmt
-Start Match
-[5] bc (ID)
-Start Expr
-Start MathExpr
-Start Term
-Start Factor
-Start NewExpr
-Start Match
-[5] then (Then)
 End NewExpr
 End Factor
 End Term
 End MathExpr
 End Expr
+End AssignStmt
+End Stmt
 Start Match
-[5] write (Write)
-Start StmtSeq
+[5] c (ID)
 Start Stmt
-Start WriteStmt
+Start AssignStmt
 Start Match
-[5] 3 (Num)
+[5] := (Assign)
+Start Match
+[5] 2.5 (Num)
 Start Expr
 Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
-Start Match
-[5] end (End)
-End NewExpr
-End Factor
-End Term
-End MathExpr
-End Expr
-End WriteStmt
-End Stmt
-End StmtSeq
 Start Match
 [5] ; (SemiColon)
-End IfStmt
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
 End Stmt
 Start Match
-[6] if (If)
+[6] a (ID)
 Start Stmt
-Start IfStmt
+Start AssignStmt
 Start Match
-[6] ba (ID)
+[6] := (Assign)
+Start Match
+[6] b (ID)
 Start Expr
 Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[6] = (Equal)
+[6] + (Plus)
 End NewExpr
 End Factor
 End Term
-End MathExpr
 Start Match
-[6] bb (ID)
-Start MathExpr
+[6] c (ID)
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[6] then (Then)
+[6] ; (SemiColon)
 End NewExpr
 End Factor
 End Term
 End MathExpr
 End Expr
+End AssignStmt
+End Stmt
 Start Match
-[7] if (If)
-Start StmtSeq
-Start Stmt
-Start IfStmt
-Start Match
-[7] ba (ID)
-Start Expr
-Start MathExpr
-Start Term
-Start Factor
-Start NewExpr
-Start Match
-[7] = (Equal)
-End NewExpr
-End Factor
-End Term
-End MathExpr
-Start Match
-[7] bc (ID)
-Start MathExpr
-Start Term
-Start Factor
-Start NewExpr
-Start Match
-[7] then (Then)
-End NewExpr
-End Factor
-End Term
-End MathExpr
-End Expr
-Start Match
-[8] write (Write)
-Start StmtSeq
+[7] write (Write)
 Start Stmt
 Start WriteStmt
 Start Match
-[8] 123 (Num)
+[7] a (ID)
 Start Expr
 Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[9] end (End)
+[7]  (EndFile)
 End NewExpr
 End Factor
 End Term
 End MathExpr
 End Expr
 End WriteStmt
-End Stmt
-End StmtSeq
-Start Match
-[10] end (End)
-End IfStmt
-End Stmt
-End StmtSeq
-Start Match
-[10]  (EndFile)
-End IfStmt
 End Stmt
 End StmtSeq

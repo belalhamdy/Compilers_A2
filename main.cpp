@@ -4,22 +4,92 @@
 #include <cstring>
 using namespace std;
 
-
+///Testcases.0
 /*
-{ Sample program
-  in TINY language
-  compute factorial
-}
+{Every testcase is a separate input}
+{Reading n and printing numbers to n}
+int n; int i; bool equal;
+i := 0;
+read n; {if entered 5.5 for example it will crash}
+repeat
+        write i;
+i := i + 1
+until i = n
 
-read x; {input an integer}
-if 0<x then {compute only if x>=1}
-  fact:=1;
-  repeat
-    fact := fact * x;
-    x:=x-1
-  until x=0;
-  write fact {output factorial}
-end
+{Reading 3 integers and perform operations}
+int int_a; int int_b; int int_c;
+read int_a; read int_b; read int_c; {if entered 5.5 for example it will crash}
+write int_a+int_b+int_c; write int_a*int_b*int_c; write int_a-int_b-int_c
+
+{Reading 3 reals and perform operations}
+real real_a; real real_b; real real_c;
+read real_a; read real_b; read real_c;
+write real_a+real_b+real_c; write real_a*real_b*real_c; write real_a-real_b-real_c
+
+{Reading 3 bools and perform operations}
+bool bool_a; bool bool_b; bool bool_c;
+read bool_a; read bool_b; read bool_c; {if entered 5.5 for example it will crash}
+write bool_a = bool_b; write bool_a = bool_c; write bool_b = bool_c
+
+{Assinging value to int}
+int a;
+a := 3;
+write a
+
+{Assinging value to real}
+real b;
+b := 3.5;
+write b
+
+{Assinging value to bool}
+bool c;
+c := 1;
+write c
+
+{Assinging int to real (Should fail)}
+real d;
+d := 1;
+write d
+
+{Assinging real to int (Should fail)}
+int e;
+e := 1.5;
+write e
+
+{Assinging real to bool (Should fail)}
+int f;
+f := 1.5;
+write f
+
+{Mulplying real and int (Should fail)}
+int a;
+real b;
+a := 1;
+b := 2.0;
+write a*b
+
+{Mulplying bool and real (Should fail)}
+bool a;
+real b;
+a := 1;
+b := 2.0;
+write a*b
+
+{Mulplying bool and bool (Should fail)}
+bool a;
+bool b;
+a := 1;
+b := 1;
+write a*b
+
+{Assigning double_expr to int (Should fail)}
+int a;
+real b;
+real c;
+b := 1.0;
+c := 2.5;
+a := b+c;
+write a
 */
 
 // sequence of statements separated by ;
@@ -272,6 +342,8 @@ void GetNextToken(CompilerInfo* pci, Token* ptoken)
     {
         int j=1;
         while(IsDigit(s[j])) j++;
+        if(s[j] == '.') j++;
+        while(IsDigit(s[j])) j++;
 
         ptoken->type=NUM;
         Copy(ptoken->str, s, j);
@@ -319,14 +391,14 @@ void GetNextToken(CompilerInfo* pci, Token* ptoken)
 
 enum NodeKind{
                 IF_NODE, REPEAT_NODE, ASSIGN_NODE, READ_NODE, WRITE_NODE,
-                OPER_NODE, NUM_NODE, ID_NODE,DECLARE_NODE
+                OPER_NODE, INT_NUM_NODE,DOUBLE_NUM_NODE, ID_NODE,DECLARE_NODE
              };
 
 // Used for debugging only /////////////////////////////////////////////////////////
 const char* NodeKindStr[]=
             {
                 "If", "Repeat", "Assign", "Read", "Write",
-                "Oper", "Num", "ID","Declare"
+                "Oper", "Int_Num","Double_Num", "ID","Declare"
             };
 
 enum ExprDataType {VOID, INTEGER, BOOLEAN, DOUBLE_EXPR};
@@ -384,9 +456,13 @@ TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
     if(ppi->next_token.type==NUM)
     {
         TreeNode* tree=new TreeNode;
-        tree->node_kind=NUM_NODE;
+        tree->node_kind=INT_NUM_NODE;
         char* num_str=ppi->next_token.str;
-        tree->num=0; while(*num_str) tree->num=tree->num*10+((*num_str++)-'0');
+        tree->num=0;
+        while(*num_str && *num_str != '.') tree->num = tree->num * 10 + ((*num_str++) - '0');
+        double deci = 1;
+        if(*num_str == '.') tree->node_kind=DOUBLE_NUM_NODE;
+        while(*++num_str) tree->num += (deci/=10) * ((*num_str) - '0');
         tree->line_num=pci->in_file.cur_line_num;
         Match(pci, ppi, ppi->next_token.type);
 
@@ -596,7 +672,8 @@ TreeNode* AssignStmt(CompilerInfo* pci, ParseInfo* ppi)
 
     if(ppi->next_token.type==ID) AllocateAndCopy(&tree->id, ppi->next_token.str);
     Match(pci, ppi, ID);
-    Match(pci, ppi, ASSIGN); tree->child[0]=Expr(pci, ppi);
+    Match(pci, ppi, ASSIGN);
+    tree->child[0]=Expr(pci, ppi);
 
     pci->debug_file.Out("End AssignStmt");
     return tree;
@@ -701,7 +778,8 @@ void PrintTree(TreeNode* node, int sh=0)
     printf("[%s]", NodeKindStr[node->node_kind]);
 
     if(node->node_kind==OPER_NODE) printf("[%s]", TokenTypeStr[node->oper]);
-    else if(node->node_kind==NUM_NODE) printf("[%d]", node->num);
+    else if(node->node_kind==INT_NUM_NODE) printf("[%d]", (int)node->num);
+    else if(node->node_kind==DOUBLE_NUM_NODE) printf("[%lf]", node->num);
     else if(node->node_kind==ID_NODE || node->node_kind==READ_NODE || node->node_kind==ASSIGN_NODE) printf("[%s]", node->id);
 
     if(node->expr_data_type!=VOID) printf("[%s]", ExprDataTypeStr[node->expr_data_type]);
@@ -871,8 +949,11 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
         if(node->oper==EQUAL || node->oper==LESS_THAN) node->expr_data_type=BOOLEAN;
         else node->expr_data_type=node->child[0]->expr_data_type;
     }
-    else if(node->node_kind==NUM_NODE){
+    else if(node->node_kind==INT_NUM_NODE){
         node->expr_data_type=INTEGER;
+    }
+    else if(node->node_kind==DOUBLE_NUM_NODE){
+        node->expr_data_type=DOUBLE_EXPR;
     }
     else if(node->node_kind==ID_NODE){
         ExprDataType datatype = symbol_table->Find(node->id)->datatype;
@@ -883,8 +964,15 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
     {
         ExprDataType datatype_1 = node->child[0]->expr_data_type;
         ExprDataType datatype_2 = node->child[1]->expr_data_type;
-        if(datatype_1 != datatype_2)
+        if(datatype_1 != datatype_2){
             printf("Expression cannot run on %s and %s.\n",ExprDataTypeStr[datatype_1],ExprDataTypeStr[datatype_2]);
+            throw 0;
+        }
+        if(datatype_1 == BOOLEAN && !(node->oper==EQUAL || node->oper==LESS_THAN)){
+            printf("Cannot run arithmetic operations on booleans.\n");
+            throw 0;
+        }
+
     }
     if(node->node_kind==IF_NODE && node->child[0]->expr_data_type!=BOOLEAN) printf("ERROR If test must be BOOLEAN\n");
     if(node->node_kind==REPEAT_NODE && node->child[1]->expr_data_type!=BOOLEAN) printf("ERROR Repeat test must be BOOLEAN\n");
@@ -907,7 +995,7 @@ double Power(double a, double b)
 
 double Evaluate(TreeNode* node, SymbolTable* symbol_table, double* variables)
 {
-    if(node->node_kind==NUM_NODE) return node->num;
+    if(node->node_kind==INT_NUM_NODE || node->node_kind == DOUBLE_NUM_NODE) return node->num;
     if(node->node_kind==ID_NODE) return variables[symbol_table->Find(node->id)->memloc];
 
 
@@ -937,7 +1025,12 @@ void RunProgram(TreeNode* node, SymbolTable* symbol_table, double* variables)
     if(node->node_kind==ASSIGN_NODE)
     {
         double v=Evaluate(node->child[0], symbol_table, variables);
-        variables[symbol_table->Find(node->id)->memloc]=v;
+        VariableInfo* vi = symbol_table->Find(node->id);
+        if(node->child[0]->expr_data_type != vi->datatype && (node->child[0]->expr_data_type != INTEGER || vi->datatype != BOOLEAN)){
+            printf("Cannot assign %s to %s.",ExprDataTypeStr[node->child[0]->expr_data_type],ExprDataTypeStr[vi->datatype]);
+            throw 0;
+        }
+        variables[vi->memloc]=v;
     }
     if(node->node_kind==READ_NODE)
     {
@@ -945,10 +1038,15 @@ void RunProgram(TreeNode* node, SymbolTable* symbol_table, double* variables)
         double v;
         scanf("%lf", &v);
         ExprDataType dataType = symbol_table->Find(node->id)->datatype;
+        if(dataType != DOUBLE_EXPR && v != (int) v){
+            printf("Cannot assign double to %s.\n",ExprDataTypeStr[dataType]);
+            throw 0;
+        }
         if(dataType == BOOLEAN){
             if((int)v) v = 1;
             else v = 0;
         }
+        if(dataType == INTEGER) v = (int) v;
         variables[symbol_table->Find(node->id)->memloc] = v;
     }
     if(node->node_kind==WRITE_NODE)

@@ -1,10 +1,7 @@
-bool ba; bool bb; bool bc;
-read ba; read bb; read bc;
-if ba then write 1 end;
-if bb then write 2 end;
-if bc then write 3 end;
-if ba = bb then
-if ba = bc then
-        write 123
-end
-        end
+int a;
+real b;
+real c;
+b := 1.0;
+c := 2.5;
+a := b+c;
+write a
