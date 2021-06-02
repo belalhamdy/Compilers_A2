@@ -478,7 +478,8 @@ void Match(CompilerInfo *pci, ParseInfo *ppi, TokenType expected_token_type)
     pci->debug_file.Out("Start Match");
 
     if (ppi->next_token.type != expected_token_type) {
-        fprintf(stderr, "Expected %s, found %s", expected_token_type, ppi->next_token.type);
+        fprintf(stderr, "Expected %s, found %s.\n", expected_token_type, ppi->next_token.type);
+        fprintf(pci->out_file.file, "Expected %s, found %s.\n", expected_token_type, ppi->next_token.type);
         throw 0;
     }
     GetNextToken(pci, &ppi->next_token);
@@ -676,7 +677,8 @@ TreeNode *DeclareStmt(CompilerInfo *pci, ParseInfo *ppi)
     else if (ppi->next_token.type == REAL) tree->expr_data_type = DOUBLE_EXPR;
     else if (ppi->next_token.type == BOOL) tree->expr_data_type = BOOLEAN;
     else {
-        fprintf(stderr, "Expected datatype, found %s", ppi->next_token.type);
+        fprintf(stderr, "Expected datatype, found %s.\n", ppi->next_token.type);
+        fprintf(pci->out_file.file, "Expected datatype, found %s.\n", ppi->next_token.type);
         throw 0;
     }
     tree->oper = ppi->next_token.type;
@@ -684,7 +686,8 @@ TreeNode *DeclareStmt(CompilerInfo *pci, ParseInfo *ppi)
     if (ppi->next_token.type == ID)
         AllocateAndCopy(&tree->id, ppi->next_token.str);
     else {
-        fprintf(stderr, "Expected id, found %s", ppi->next_token.type);
+        fprintf(stderr, "Expected id, found %s.\n", ppi->next_token.type);
+        fprintf(pci->out_file.file, "Expected id, found %s.\n", ppi->next_token.type);
         throw 0;
     }
 
@@ -895,7 +898,7 @@ struct SymbolTable
             if (Equals(name, cur->name)) return cur;
             cur = cur->next_var;
         }
-        printf("Error cannot find variable %s .", name);
+        fprintf(stderr,"Error cannot find variable %s.\n", name);
         return 0;
     }
 
@@ -911,7 +914,7 @@ struct SymbolTable
 
         while (cur) {
             if (Equals(name, cur->name)) {
-                printf("Error variable %s is already declared before.\n", name);
+                fprintf(stderr,"Error variable %s is already declared before.\n", name);
                 throw 0;
                 /*
                  * // just add this line location to the list of line locations of the existing var
@@ -999,21 +1002,19 @@ void Analyze(TreeNode *node, SymbolTable *symbol_table)
         ExprDataType datatype_1 = node->child[0]->expr_data_type;
         ExprDataType datatype_2 = node->child[1]->expr_data_type;
         if (datatype_1 != datatype_2) {
-            printf("Expression cannot run on %s and %s.\n", ExprDataTypeStr[datatype_1], ExprDataTypeStr[datatype_2]);
+            fprintf(stderr,"Expression cannot run on %s and %s.\n", ExprDataTypeStr[datatype_1], ExprDataTypeStr[datatype_2]);
             throw 0;
         }
         if (datatype_1 == BOOLEAN && !(node->oper == EQUAL || node->oper == LESS_THAN)) {
-            printf("Cannot run arithmetic operations on booleans.\n");
+            fprintf(stderr,"Cannot run arithmetic operations on booleans.\n");
             throw 0;
         }
 
     }
     if (node->node_kind == IF_NODE && node->child[0]->expr_data_type != BOOLEAN)
-        printf("ERROR If test must be BOOLEAN\n");
+        fprintf(stderr,"ERROR If test must be BOOLEAN.\n");
     if (node->node_kind == REPEAT_NODE && node->child[1]->expr_data_type != BOOLEAN)
-        printf("ERROR Repeat test must be BOOLEAN\n");
-//    if(node->node_kind==WRITE_NODE && node->child[0]->expr_data_type!=INTEGER) printf("ERROR Write works only for INTEGER\n");
-//    if(node->node_kind==ASSIGN_NODE && node->child[0]->expr_data_type!=INTEGER) printf("ERROR Assign works only for INTEGER\n");
+        fprintf(stderr,"ERROR Repeat test must be BOOLEAN.\n");
 
     if (node->sibling) Analyze(node->sibling, symbol_table);
 }
@@ -1062,7 +1063,7 @@ void RunProgram(TreeNode *node, SymbolTable *symbol_table, double *variables)
         VariableInfo *vi = symbol_table->Find(node->id);
         if (node->child[0]->expr_data_type != vi->datatype &&
             (node->child[0]->expr_data_type != INTEGER || vi->datatype != BOOLEAN)) {
-            printf("Cannot assign %s to %s.", ExprDataTypeStr[node->child[0]->expr_data_type],
+            fprintf(stderr,"Cannot assign %s to %s.\n", ExprDataTypeStr[node->child[0]->expr_data_type],
                    ExprDataTypeStr[vi->datatype]);
             throw 0;
         }
@@ -1074,7 +1075,7 @@ void RunProgram(TreeNode *node, SymbolTable *symbol_table, double *variables)
         scanf("%lf", &v);
         ExprDataType dataType = symbol_table->Find(node->id)->datatype;
         if (dataType != DOUBLE_EXPR && v != (int) v) {
-            printf("Cannot assign double to %s.\n", ExprDataTypeStr[dataType]);
+            fprintf(stderr,"Cannot assign double to %s.\n", ExprDataTypeStr[dataType]);
             throw 0;
         }
         if (dataType == BOOLEAN) {
